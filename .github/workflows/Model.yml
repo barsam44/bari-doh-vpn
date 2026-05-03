@@ -18,6 +18,34 @@ jobs:
           curl -L -o model.gguf \
             "https://huggingface.co/mradermacher/GPT2.5.2-NSFW-Codex-0.4B-GGUF/resolve/main/GPT2.5.2-NSFW-Codex-0.4B.Q2_K.gguf?download=true"
 
+      - name: Split into 10 MB chunks
+        run: |
+          mkdir -p model_chunks
+          cd model_chunks
+          split -b 10M ../model.gguf model.gguf.part_
+          # split creates files like model.gguf.part_aa, ab, ...
+          cd ..
+          # Remove the original large file; we only keep chunks
+          rm model.gguf
+
+      - name: Create merge scripts
+        run: |
+          # Linux/macOS script
+          cat > model_chunks/merge.sh << 'EOF'
+          #!/bin/bash
+          echo "Merging model.gguf..."
+          cat model.gguf.part_* > ../model.gguf
+          echo "Done! model.gguf is in the parent folder."
+          EOF
+          chmod +x model_chunks/merge.sh
+
+          # Windows batch file
+          cat > model_chunks/merge.bat << 'EOF'
+          @echo off
+          echo Merging model.gguf...
+          copy /b model.gguf.part_* ..\model.gguf
+          echo Done! model.gguf is in the parent folder.
+          EOF
 
       - name: Commit and push
         run: |
