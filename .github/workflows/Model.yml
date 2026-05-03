@@ -18,9 +18,6 @@ jobs:
           curl -L -o model.gguf \
             "https://huggingface.co/mradermacher/GPT2.5.2-NSFW-Codex-0.4B-GGUF/resolve/main/GPT2.5.2-NSFW-Codex-0.4B.Q2_K.gguf?download=true"
 
-      - name: Split into 10 MB chunks
-        run: |
-          mkdir -p model_chunks
 
       - name: Commit and push
         run: |
