@@ -1,0 +1,31 @@
+name: Download Model, Split into 10 MB Chunks & Commit
+
+on:
+  workflow_dispatch:   # manual trigger
+
+jobs:
+  split-and-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download the GGUF model
+        run: |
+          curl -L -o model.gguf \
+            "https://huggingface.co/mradermacher/GPT2.5.2-NSFW-Codex-0.4B-GGUF/resolve/main/GPT2.5.2-NSFW-Codex-0.4B.Q2_K.gguf?download=true"
+
+      - name: Split into 10 MB chunks
+        run: |
+          mkdir -p model_chunks
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add model_chunks/
+          git commit -m "Add model in 10 MB parts + merge scripts" || echo "No changes to commit"
+          git push
